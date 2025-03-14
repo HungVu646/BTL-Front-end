@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Danh Sách Sinh Viên</title>
+    <script src="jquery-3.7.1.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        .container {
+            width: 90%;
+            margin: 10px auto;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .container h3 {
+            text-transform: uppercase;
+            padding: 10px 0;
+        }
+        h3 {
+            display: flex;
+            justify-content: center;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #dcd4d4;
+            padding: 8px 8px;
+        }
+        th {
+            background-color: aliceblue;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h3>Danh Sách Sinh Viên</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>STT</th>
+                    <th>Họ tên</th>
+                    <th>Điện thoại</th>
+                    <th>Địa chỉ</th>
+                    <th>Hành động</th> 
+                </tr>
+            </thead>
+            <tbody id="content">
+                <!-- Dữ liệu Call từ api sẽ hiển thị tại đây -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            loadData();
+        });
+
+        // Hàm call dữ liệu từ api
+        function loadData() {
+            $.ajax({
+                url: "https://67b2d639bc0165def8cec005.mockapi.io/students",
+                type: 'GET',
+                dataType: 'json',
+                success: function(response) {
+                    let row = '';
+                    let i = 1;
+                    $.each(response, function(index, value) {
+                        row += '<tr>';
+                        row += '<td>' + i + '</td>';
+                        row += '<td>' + value.fullname + '</td>';
+                        row += '<td>' + value.phone + '</td>';
+                        row += '<td>' + value.address + '</td>';
+                        row += '<td><button class="btn-delete" onclick="deletestudent(' + value.id + ')">Xóa</button></td>'; 
+                        row += '</tr>';
+                        i++;
+                    });
+                    $("#content").html(row);
+                },
+                error: function(e) {
+                    console.log('Error', e); // Sửa lỗi chính tả
+                }
+            });
+        }
+
+        // Hàm xóa sinh viên
+        function deletestudent(id) {
+            if (confirm('Bạn có đồng ý xóa không?')) { 
+                $.ajax({
+                    url: 'https://67b2d639bc0165def8cec005.mockapi.io/students/' + id, // Thêm dấu '/' trước id
+                    type: 'DELETE',
+                    dataType: 'json',
+                    success: function(response) {
+                        loadData(); // Tải lại dữ liệu sau khi xóa
+                    },
+                    error: function(e) {
+                        console.log("Error", e); // Sửa lỗi chính tả
+                    }
+                });
+            }
+        }
+    </script>
+</body>
+</html>

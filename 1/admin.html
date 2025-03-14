@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản Lý Bài Viết</title>
+    <link rel="stylesheet" href="bootstrap-5.3.3-dist/css/bootstrap.min.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-sm navbar-light bg-danger">
+        <div class="container mx-auto flex justify-between items-center py-4 px-6">
+            <a href="index.html" class="navbar-brand"><img class="h-8" height="100px" src="image/logo.png" alt=""></a>
+            <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#menu">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div id="menu" class="collapse navbar-collapse flex-grow">
+                <ul class="navbar-nav mx-auto">
+                    <li class="nav-item"><a href="index.html" class="nav-link">Trang Chủ</a></li>
+                    <li class="nav-item"><a href="admin.html" class="nav-link">Quản Lý</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <h2>Quản Lý Bài Viết</h2>
+        <form id="postForm">
+            <div class="mb-3">
+                <label for="postTitle" class="form-label">Tiêu đề</label>
+                <input type="text" class="form-control" id="postTitle" required>
+            </div>
+            <div class="mb-3">
+                <label for="postStatus" class="form-label">Trạng thái</label>
+                <select class="form-select" id="postStatus" required>
+                    <option value="Chờ duyệt">Chờ duyệt</option>
+                    <option value="Đã duyệt">Đã duyệt</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Thêm Bài Viết</button>
+        </form>
+        <table class="table mt-3">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Tiêu đề</th>
+                    <th>Người đăng</th>
+                    <th>Trạng thái</th>
+                    <th>Hành động</th>
+                </tr>
+            </thead>
+            <tbody id="adminPostList"></tbody>
+        </table>
+    </div>
+
+    <script>
+        // Lấy dữ liệu từ Local Storage
+        let posts = JSON.parse(localStorage.getItem('posts')) || [];
+        let editIndex = -1; // Chỉ số bài viết đang sửa
+
+        // Hiển thị bài viết trong bảng quản lý
+        function renderPosts() {
+            const adminPostList = document.getElementById('adminPostList');
+            adminPostList.innerHTML = ''; // Xóa nội dung cũ
+
+            posts.forEach((post, index) => {
+                const row = `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td>${post.title}</td>
+                        <td>User</td>
+                        <td>${post.status}</td>
+                        <td>
+                            <button class="btn btn-success" onclick="approvePost(${index})">Duyệt</button>
+                            <button class="btn btn-warning" onclick="editPost(${index})">Sửa</button>
+                            <button class="btn btn-danger" onclick="deletePost(${index})">Xóa</button>
+                        </td>
+                    </tr>
+                `;
+                adminPostList.innerHTML += row;
+            });
+        }
+
+        // Thêm hoặc sửa bài viết
+        document.getElementById('postForm').addEventListener('submit', function(event) {
+            event.preventDefault(); // Ngăn chặn hành động mặc định của form
+
+            const title = document.getElementById('postTitle').value;
+            const status = document.getElementById('postStatus').value;
+
+            if (editIndex === -1) {
+                // Thêm bài viết mới vào danh sách
+                posts.push({ title, status });
+            } else {
+                // Cập nhật bài viết đang sửa
+                posts[editIndex] = { title, status };
+                editIndex = -1; // Đặt lại chỉ số sau khi sửa
+            }
+
+            localStorage.setItem('posts', JSON.stringify(posts));
+            renderPosts();
+
+            // Reset form
+            this.reset();
+        });
+
+        // Duyệt bài viết
+        function approvePost(index) {
+            posts[index].status = "Đã duyệt";
+            localStorage.setItem('posts', JSON.stringify(posts));
+            renderPosts();
+        }
+
+        // Sửa bài viết
+        function editPost(index) {
+            document.getElementById('postTitle').value = posts[index].title;
+            document.getElementById('postStatus').value = posts[index].status;
+            editIndex = index; // Cập nhật chỉ số để sửa
+        }
+
+        // Xóa bài viết
+        function deletePost(index) {
+            posts.splice(index, 1);
+            localStorage.setItem('posts', JSON.stringify(posts));
+            renderPosts();
+        }
+        
+        renderPosts();
+    </script>
+</body>
+</html>
